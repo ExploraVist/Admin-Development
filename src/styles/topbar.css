@@ -1,0 +1,70 @@
+.topbar {
+  height: var(--topbar-height);
+  background: var(--bg-two);
+  border-bottom: 1px solid var(--line-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.topbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.topbar-user {
+  position: relative;
+}
+
+.topbar-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.topbar-user-btn:hover {
+  background: var(--bg-three);
+}
+
+.topbar-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 200px;
+  background: var(--bg-three);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.topbar-dropdown-info {
+  padding: 12px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.topbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 13px;
+  text-align: left;
+}
+
+.topbar-dropdown-item:hover {
+  background: var(--bg-tint);
+  color: var(--text);
+}

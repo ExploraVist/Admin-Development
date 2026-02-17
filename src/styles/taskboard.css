@@ -1,0 +1,30 @@
+.taskboard-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-3);
+}
+
+.taskboard-filter .select {
+  min-width: 140px;
+}
+
+.taskboard-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-3);
+}
+
+.taskboard-empty p {
+  margin-bottom: 16px;
+}
+
+.task-link {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.task-link:hover {
+  color: var(--alt);
+}

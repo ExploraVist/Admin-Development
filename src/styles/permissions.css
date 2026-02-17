@@ -1,0 +1,28 @@
+.perm-team-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.perm-team-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.perm-team-chip:hover {
+  border-color: var(--alt);
+  color: var(--alt);
+}
+
+.perm-team-chip.active {
+  background: var(--alt-3);
+  border-color: var(--alt);
+  color: var(--alt);
+}
