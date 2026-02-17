@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useCallback, useMemo, memo } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
   collection,
@@ -6,8 +6,9 @@ import {
   orderBy,
   doc,
   updateDoc,
+  deleteDoc,
 } from 'firebase/firestore';
-import { Save, Shield } from 'lucide-react';
+import { Shield, UserCheck, UserX } from 'lucide-react';
 import { db } from '../firebase';
 import { useFirestoreQuery } from '../hooks/useFirestoreQuery';
 import { useAuth } from '../hooks/useAuth';
@@ -54,6 +55,32 @@ const UserRow = memo(function UserRow({ adminUserDoc, onToggleTeam, onChangeRole
   );
 });
 
+const PendingRow = memo(function PendingRow({ user, onApprove, onReject }) {
+  const createdAt = user.createdAt?.toDate
+    ? user.createdAt.toDate().toLocaleDateString()
+    : '—';
+
+  return (
+    <div className="pending-request">
+      <div className="pending-request-info">
+        <div style={{ fontWeight: 500, color: 'var(--text)' }}>{user.displayName}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{user.email}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>Requested {createdAt}</div>
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button className="btn btn-primary btn-sm" onClick={() => onApprove(user.id)}>
+          <UserCheck size={14} />
+          Approve
+        </button>
+        <button className="btn btn-danger btn-sm" onClick={() => onReject(user.id)}>
+          <UserX size={14} />
+          Reject
+        </button>
+      </div>
+    </div>
+  );
+});
+
 export default function Permissions() {
   const { isAdmin } = useAuth();
 
@@ -61,7 +88,25 @@ export default function Permissions() {
     return query(collection(db, 'adminUsers'), orderBy('createdAt', 'asc'));
   }, []);
 
-  const { data: users, loading } = useFirestoreQuery(usersQuery);
+  const { data: allUsers, loading } = useFirestoreQuery(usersQuery);
+
+  const pendingUsers = useMemo(() => {
+    return allUsers.filter(u => u.status === 'pending');
+  }, [allUsers]);
+
+  const approvedUsers = useMemo(() => {
+    return allUsers.filter(u => u.status !== 'pending');
+  }, [allUsers]);
+
+  const handleApprove = useCallback(async (userId) => {
+    const ref = doc(db, 'adminUsers', userId);
+    await updateDoc(ref, { status: 'approved' });
+  }, []);
+
+  const handleReject = useCallback(async (userId) => {
+    if (!window.confirm('Reject and remove this account request?')) return;
+    await deleteDoc(doc(db, 'adminUsers', userId));
+  }, []);
 
   const handleToggleTeam = useCallback(async (userId, teamSlug, currentTeams) => {
     const ref = doc(db, 'adminUsers', userId);
@@ -87,6 +132,26 @@ export default function Permissions() {
         </h1>
       </div>
 
+      {/* Pending Approvals */}
+      {pendingUsers.length > 0 && (
+        <div className="pending-section">
+          <h3 className="pending-section-title">
+            Pending Approvals
+            <span className="pending-count">{pendingUsers.length}</span>
+          </h3>
+          <div className="pending-list">
+            {pendingUsers.map(u => (
+              <PendingRow
+                key={u.id}
+                user={u}
+                onApprove={handleApprove}
+                onReject={handleReject}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <p style={{ color: 'var(--text-3)', fontSize: 14, marginBottom: 20 }}>
         Assign team access and roles. Members can only see teams they're assigned to. Admins see all teams.
       </p>
@@ -106,7 +171,7 @@ export default function Permissions() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => (
+              {approvedUsers.map(u => (
                 <UserRow
                   key={u.id}
                   adminUserDoc={u}

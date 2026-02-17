@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useCallback, useMemo } from 'react'
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -34,6 +35,22 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }, []);
 
+  const signup = useCallback(async (email, password, displayName) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+    const newDoc = {
+      email,
+      displayName: displayName || email.split('@')[0],
+      role: isAdmin ? 'admin' : 'member',
+      status: isAdmin ? 'approved' : 'pending',
+      teams: [],
+      createdAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'adminUsers', cred.user.uid), newDoc);
+    setAdminUser({ id: cred.user.uid, ...newDoc });
+    return cred;
+  }, []);
+
   const logout = useCallback(async () => {
     return signOut(auth);
   }, []);
@@ -52,10 +69,12 @@ export function AuthProvider({ children }) {
     adminUser,
     loading,
     login,
+    signup,
     logout,
     refreshAdminUser,
     isAdmin: adminUser?.role === 'admin',
-  }), [user, adminUser, loading, login, logout, refreshAdminUser]);
+    isPending: adminUser?.status === 'pending',
+  }), [user, adminUser, loading, login, signup, logout, refreshAdminUser]);
 
   return (
     <AuthContext.Provider value={value}>
@@ -69,14 +88,22 @@ async function loadOrCreateAdminUser(firebaseUser) {
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
-    return { id: snap.id, ...snap.data() };
+    const data = snap.data();
+    // Backfill status for users created before the approval system
+    if (!data.status) {
+      await setDoc(ref, { status: 'approved' }, { merge: true });
+      data.status = 'approved';
+    }
+    return { id: snap.id, ...data };
   }
 
+  // Existing users who signed in before the approval system — auto-approve
   const isAdmin = ADMIN_EMAILS.includes(firebaseUser.email?.toLowerCase());
   const newDoc = {
     email: firebaseUser.email,
     displayName: firebaseUser.displayName || firebaseUser.email.split('@')[0],
     role: isAdmin ? 'admin' : 'member',
+    status: isAdmin ? 'approved' : 'pending',
     teams: [],
     createdAt: serverTimestamp(),
   };
