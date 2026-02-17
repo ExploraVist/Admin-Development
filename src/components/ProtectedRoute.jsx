@@ -1,8 +1,10 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Clock, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { LoadingSpinner } from './LoadingSpinner';
+import '../styles/login.css';
 
 const ROUTE_TITLES = {
   '/dashboard': 'Dashboard',
@@ -25,7 +27,7 @@ function getTitle(pathname) {
 }
 
 export function ProtectedRoute() {
-  const { user, loading } = useAuth();
+  const { user, adminUser, loading, isPending, logout, refreshAdminUser } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -38,6 +40,35 @@ export function ProtectedRoute() {
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (isPending) {
+    return (
+      <div className="pending-page">
+        <div className="pending-card">
+          <div className="pending-icon">
+            <Clock size={24} color="var(--yellow)" />
+          </div>
+          <h2 className="pending-title">Awaiting Approval</h2>
+          <p className="pending-text">
+            Your account <span className="pending-email">{adminUser?.email}</span> has been
+            registered and is waiting for an admin to approve access.
+          </p>
+          <p className="pending-text">
+            You'll get full access once approved. Check back soon.
+          </p>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <button className="btn btn-secondary" onClick={refreshAdminUser}>
+              Check Status
+            </button>
+            <button className="btn btn-secondary" onClick={logout}>
+              <LogOut size={14} />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const title = getTitle(location.pathname);

@@ -51,3 +51,71 @@
   padding: 10px;
   margin-top: 8px;
 }
+
+.login-toggle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.login-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--alt);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.login-toggle-btn:hover {
+  text-decoration: underline;
+}
+
+.pending-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.pending-card {
+  background: var(--bg-two);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 48px 40px;
+  width: 420px;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.pending-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(250, 204, 21, 0.1);
+  border: 1px solid var(--yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.pending-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pending-text {
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.pending-email {
+  color: var(--alt);
+  font-weight: 500;
+}
